@@ -1,6 +1,3 @@
-# dxgi-rs
-[![Build status](https://ci.appveyor.com/api/projects/status/btppf53dydmnjhyy?svg=true)](https://ci.appveyor.com/project/GuildMasterInfinite/dxgi-rs)
-
 Rust wrapper around the [DirectX Graphics Interface](https://msdn.microsoft.com/en-us/library/windows/desktop/hh404534(v=vs.85).aspx).
 
 ## Note on documentation
