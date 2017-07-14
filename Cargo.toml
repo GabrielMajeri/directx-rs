@@ -1,0 +1,6 @@
+[workspace]
+members = [
+	"dxgi",
+	"direct3d",
+	"direct2d"
+]
