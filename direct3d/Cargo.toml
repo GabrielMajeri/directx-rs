@@ -8,3 +8,6 @@ comptr = { git = "https://github.com/GuildMasterInfinite/comptr-rs" }
 # TODO: use the main winapi repo when it gets updated.
 winapi = { git = "https://github.com/GuildMasterInfinite/winapi-rs", branch = "dev", features = ["d3d11"] }
 dxgi = { path = "../dxgi" }
+
+[target.'cfg(windows)'.dev-dependencies]
+winit = "*"
