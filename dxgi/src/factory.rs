@@ -1,4 +1,4 @@
-use {ComPtr, Interface, dxgi, dxgi1_2/*, winerror*/};
+use {ComPtr, Interface, dxgi, dxgi1_2, winerror};
 //use winapi::HWND;
 use std::ptr;
 use adapter::Adapter;
@@ -15,7 +15,7 @@ pub struct Factory(ComPtr<FactoryInterface>);
 
 impl Factory {
 	/// Creates a new DXGI factory.
-	pub fn new() -> Factory {
+	pub fn new() -> Result<Factory, FactoryCreateError> {
 		let factory = ComPtr::new({
 			let mut factory = ptr::null_mut();
 
@@ -28,13 +28,14 @@ impl Factory {
 				)
 			};
 
-			// TODO: error handling.
-			assert_eq!(result, 0);
-
-			factory as *mut _
+			match result {
+				winerror::S_OK => factory as *mut _,
+				winerror::E_OUTOFMEMORY => return Err(FactoryCreateError::OutOfMemory),
+				_ => return Err(FactoryCreateError::UnknownError(result))
+			}
 		});
 
-		Factory(factory)
+		Ok(Factory(factory))
 	}
 
 	/// Returns an iterator to all of the adapters on the system.
@@ -88,6 +89,15 @@ impl Factory {
 }
 
 implement_object!(Factory, FactoryInterface);
+
+/// Possible errors returned by [`Factory::new`](struct.Factory.html#method.new).
+#[derive(Debug, Copy, Clone)]
+pub enum FactoryCreateError {
+	/// No memory available to create a new factory.
+	OutOfMemory,
+	/// Some unknown error.
+	UnknownError(winerror::HRESULT)
+}
 
 /*
 /// Errors returned by `Factory::associate_window`.

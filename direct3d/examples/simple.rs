@@ -50,7 +50,8 @@ fn main() {
 		}
 	};
 
-	let factory = Factory::new();
+	let factory = Factory::new()
+		.expect("Failed to create DXGI factory.");
 
 	let adapter = choose_adapter(&factory);
 

@@ -9,7 +9,7 @@
 
 #[macro_use] extern crate common;
 use common::ComPtr;
-use common::winapi::{dxgi, dxgi1_2, dxgiformat, dxgitype, Interface, HWND, IUnknown};
+use common::winapi::{dxgi, dxgi1_2, dxgiformat, dxgitype, winerror, Interface, HWND, IUnknown};
 
 // TODO: investigate the thread safety of DXGI. The documentation is unclear.
 

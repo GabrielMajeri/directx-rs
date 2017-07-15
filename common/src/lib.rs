@@ -14,6 +14,8 @@ pub mod winapi {
 	pub use _winapi::shared::windef::HWND;
 	pub use _winapi::um::unknwnbase::IUnknown;
 
+	pub use _winapi::shared::winerror;
+
 	// DXGI dependencies.
 	pub use _winapi::shared::{dxgiformat, dxgitype, dxgi, dxgi1_2};
 
