@@ -1,6 +1,8 @@
-use comptr::ComPtr;
-use winapi::shared::{dxgi};
+use {ComPtr};
+use dxgi;
 use std::{mem, fmt};
+
+type AdapterInterface = dxgi::IDXGIAdapter1;
 
 /// Represents a display subsystem, such as a graphics card, or a software renderer.
 ///
@@ -9,10 +11,12 @@ use std::{mem, fmt};
 /// Read the [IDXGIAdapter](https://msdn.microsoft.com/en-us/library/windows/desktop/bb174523(v=vs.85).aspx) interface documentation on MSDN for more information.
 // TODO: use the IDXGIAdapter2 structure
 #[derive(Debug, Clone)]
-pub struct Adapter(ComPtr<dxgi::IDXGIAdapter1>);
+pub struct Adapter(ComPtr<AdapterInterface>);
 
 impl Adapter {
-	pub (in super) fn new(adapter: ComPtr<dxgi::IDXGIAdapter1>) -> Self {
+	// TODO: this function is used by `Factory` to create these adapters.
+	// Is there any workaround that does not require this function?
+	pub (in super) fn new(adapter: ComPtr<AdapterInterface>) -> Self {
 		Adapter(adapter)
 	}
 
@@ -27,6 +31,8 @@ impl Adapter {
 		desc
 	}
 }
+
+implement_object!(Adapter, AdapterInterface);
 
 /// A structure contain information about the adapter and its capabilities.
 #[derive(Copy, Clone)]

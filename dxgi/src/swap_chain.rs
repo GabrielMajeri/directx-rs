@@ -1,23 +1,22 @@
-use comptr::ComPtr;
-
-use winapi::shared::{dxgi, dxgi1_2, dxgiformat, dxgitype};
-use winapi::shared::windef::HWND;
-use winapi::um::unknwnbase::IUnknown;
+use {ComPtr, Interface, dxgi, dxgi1_2, dxgiformat, dxgitype, HWND, IUnknown};
+use common::DXObject;
 
 use factory::Factory;
 
-use std::mem;
+use std::ptr;
 
 /// Contains one or more surfaces for storing rendered data before presenting it to an output.
+///
+/// See the [IDXGISwapChain](https://msdn.microsoft.com/en-us/library/windows/desktop/bb174569(v=vs.85).aspx) interface documentation for more.
 pub struct SwapChain(ComPtr<dxgi1_2::IDXGISwapChain1>);
 
 impl SwapChain {
 	/// Creates a new swapchain for a window.
+	// TODO: is there a way to get a Device instead of an IUnknown?
 	// TODO: maybe support creating swapchains for CoreWindow or Composition?
 	// TODO: support creation options.
 	pub fn new(factory: &Factory, device: &mut IUnknown, window: HWND) -> Self {
-		let swap_chain = ComPtr::new_with(|ptr| {
-
+		let swap_chain = ComPtr::new({
 			let desc = dxgi1_2::DXGI_SWAP_CHAIN_DESC1 {
 				Width: 0,
 				Height: 0,
@@ -48,21 +47,46 @@ impl SwapChain {
 				Windowed: true as i32
 			};
 
+			let mut swap_chain = ptr::null_mut();
+
 			let result = unsafe {
-				mem::transmute::<_, &ComPtr<dxgi1_2::IDXGIFactory2>>(factory).to_raw().CreateSwapChainForHwnd(
+				factory.as_inner().CreateSwapChainForHwnd(
 					device,
 					window,
 					&desc,
 					&fullscreen_desc,
 					// TODO: support restriction to output.
-					::std::ptr::null_mut(),
-					ptr
+					ptr::null_mut(),
+					&mut swap_chain
 				)
 			};
 
 			assert_eq!(result, 0);
+
+			swap_chain
 		});
 
 		SwapChain(swap_chain)
+	}
+
+	/// Returns a given buffer of the swap chain.
+	pub fn get_buffer<I>(&self, index: u32) -> ComPtr<I>
+		where I: Interface {
+		// TODO: fix to check for number. of buffers.
+
+		let mut view = ptr::null_mut();
+
+		let result = unsafe {
+			self.0.GetBuffer(
+				// Get the back buffer.
+				0,
+				&I::uuidof(),
+				&mut view
+			)
+		};
+
+		assert_eq!(result, 0, "Failed to get buffer #{} from swap chain.", index);
+
+		ComPtr::new(view as *mut _)
 	}
 }

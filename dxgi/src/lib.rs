@@ -7,8 +7,9 @@
 #![cfg(windows)]
 #![deny(warnings, missing_docs)]
 
-extern crate comptr;
-extern crate winapi;
+#[macro_use] extern crate common;
+use common::ComPtr;
+use common::winapi::{dxgi, dxgi1_2, dxgiformat, dxgitype, Interface, HWND, IUnknown};
 
 // TODO: investigate the thread safety of DXGI. The documentation is unclear.
 

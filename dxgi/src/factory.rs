@@ -1,31 +1,37 @@
-use comptr::ComPtr;
-use winapi::shared::{dxgi, dxgi1_2/*, winerror*/};
-//use winapi::shared::windef::HWND;
-use std::{mem/*, ptr*/};
+use {ComPtr, Interface, dxgi, dxgi1_2/*, winerror*/};
+//use winapi::HWND;
+use std::ptr;
 use adapter::Adapter;
+
+// Use this type when referring to the contained interface.
+// This allows to change the interface's version without rewriting all the references.
+type FactoryInterface = dxgi1_2::IDXGIFactory2;
 
 /// Interface used to create other DXGI objects.
 ///
 /// Can also be associated with a window to allow users to toggle fullscreen mode using Alt-Enter.
 #[derive(Debug, Clone)]
-pub struct Factory(ComPtr<dxgi1_2::IDXGIFactory2>);
+pub struct Factory(ComPtr<FactoryInterface>);
 
 impl Factory {
 	/// Creates a new DXGI factory.
 	pub fn new() -> Factory {
-		let factory = ComPtr::new_with(|ptr| {
-			let result = unsafe {
-				use winapi::Interface;
+		let factory = ComPtr::new({
+			let mut factory = ptr::null_mut();
 
+			let result = unsafe {
 				// https://msdn.microsoft.com/en-us/library/windows/desktop/bb204862(v=vs.85).aspx
 				// TODO: support using the debugging layer.
 				dxgi::CreateDXGIFactory1(
-					&dxgi1_2::IDXGIFactory2::uuidof(),
-					mem::transmute(ptr)
+					&FactoryInterface::uuidof(),
+					&mut factory
 				)
 			};
 
+			// TODO: error handling.
 			assert_eq!(result, 0);
+
+			factory as *mut _
 		});
 
 		Factory(factory)
@@ -80,6 +86,9 @@ impl Factory {
 	}
 */
 }
+
+implement_object!(Factory, FactoryInterface);
+
 /*
 /// Errors returned by `Factory::associate_window`.
 #[derive(Debug, Copy, Clone)]
@@ -109,7 +118,7 @@ impl<'f> Drop for WindowAssociation<'f> {
 */
 /// Iterator for the adapters connected to the computer.
 pub struct AdapterIterator<'factory> {
-	factory: &'factory dxgi1_2::IDXGIFactory2,
+	factory: &'factory FactoryInterface,
 	index: u32
 }
 
@@ -117,22 +126,19 @@ impl<'f> Iterator for AdapterIterator<'f> {
 	type Item = Adapter;
 
 	fn next(&mut self) -> Option<Self::Item> {
-		let adapter = ComPtr::try_new_with(|ptr| {
-			let result = unsafe {
-				self.factory.EnumAdapters1(self.index, ptr)
-			};
+		let mut adapter = ptr::null_mut();
 
-			if result == 0 {
-				// No error, enumerated successfully.
-				self.index += 1;
-				None
-			} else {
-				Some(result)
-			}
-		});
+		let result = unsafe {
+			self.factory.EnumAdapters1(self.index, &mut adapter)
+		};
 
-		adapter.ok()
-			.map(Adapter::new)
+		if result == 0 {
+			// No error, enumerated successfully.
+			self.index += 1;
+			Some(Adapter::new(ComPtr::new(adapter)))
+		} else {
+			None
+		}
 	}
 }
 
