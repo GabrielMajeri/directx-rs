@@ -1,8 +1,5 @@
 extern crate winit;
 
-extern crate winapi;
-use winapi::shared::windef::HWND;
-
 extern crate dxgi;
 
 extern crate direct3d;
@@ -26,13 +23,6 @@ fn create_window() -> (winit::EventsLoop, winit::Window) {
 	(events_loop, window)
 }
 
-fn get_hwnd(window: &winit::Window) -> HWND {
-	use winit::os::windows::WindowExt;
-	unsafe {
-		std::mem::transmute(window.get_hwnd())
-	}
-}
-
 use dxgi::factory::Factory;
 use dxgi::adapter::Adapter;
 
@@ -53,15 +43,24 @@ fn choose_adapter(factory: &Factory) -> Adapter {
 
 fn main() {
 	let (mut events_loop, window) = create_window();
-	let hwnd = get_hwnd(&window);
+	let hwnd = {
+		use winit::os::windows::WindowExt;
+		unsafe {
+			std::mem::transmute(window.get_hwnd())
+		}
+	};
 
 	let factory = Factory::new();
 
 	let adapter = choose_adapter(&factory);
 
-	let device = direct3d::device::Device::new(Some(adapter));
+	let (device, context) = direct3d::device::create_device(Some(&adapter));
 
-	let _swap_chain = dxgi::swap_chain::SwapChain::new(&factory, device.as_unknown(), hwnd);
+	let swap_chain = dxgi::swap_chain::SwapChain::new(&factory, device.as_unknown(), hwnd);
+
+	let rt_view = direct3d::render_target_view::RenderTargetView::from_swap_chain_back_buffer(&device, &swap_chain);
+
+	context.output_merger().set_render_targets(Some(&[&rt_view]));
 
 	let mut is_running = true;
 
@@ -80,6 +79,8 @@ fn main() {
 				_ => ()
 			}
 		});
+
+		context.clear_render_target_view(&rt_view);
 
 		render();
 	}
