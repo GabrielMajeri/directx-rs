@@ -83,6 +83,8 @@ fn main() {
 		context.clear_render_target_view(&rt_view);
 
 		render();
+
+		swap_chain.present();
 	}
 }
 

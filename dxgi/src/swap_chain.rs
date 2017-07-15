@@ -89,4 +89,14 @@ impl SwapChain {
 
 		ComPtr::new(view as *mut _)
 	}
+
+	/// Presents a rendered image to the user.
+	///
+	/// https://msdn.microsoft.com/en-us/library/windows/desktop/bb174576(v=vs.85).aspx
+	// TODO: support flags
+	pub fn present(&self) {
+		let _result = unsafe {
+			self.0.Present(0, 0)
+		};
+	}
 }

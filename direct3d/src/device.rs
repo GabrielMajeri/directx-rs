@@ -83,7 +83,8 @@ impl DeviceContext {
 	/// Sets a render target to a given color.
 	// TODO: support custom clear color.
 	pub fn clear_render_target_view(&self, rt_view: &RenderTargetView) {
-		let color = [0.0, 0.0, 0.0, 0.0];
+		// Cornflower blue.
+		let color = [100.0/255.0, 149.0/255.0, 237.0/255.0, 0.0];
 
 		unsafe {
 			self.as_inner().ClearRenderTargetView(
