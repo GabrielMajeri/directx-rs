@@ -4,6 +4,4 @@ version = "0.1.0"
 authors = ["Gabriel Majeri <gabriel.majeri6@gmail.com>"]
 
 [target.'cfg(windows)'.dependencies]
-comptr = { git = "https://github.com/GuildMasterInfinite/comptr-rs" }
-# TODO: use the main winapi repo when it gets updated.
-winapi = { git = "https://github.com/GuildMasterInfinite/winapi-rs", branch = "dev", features = ["d2d1_2"] }
+common = { path = "../common" }
