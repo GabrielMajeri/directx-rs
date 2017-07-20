@@ -4,6 +4,8 @@
 environment:
   global:
     RUST_VERSION: nightly
+    RUSTUP_USE_HYPER: 1
+    CARGO_HTTP_CHECK_REVOKE: false
 
   matrix:
     # MinGW
