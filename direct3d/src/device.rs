@@ -8,12 +8,9 @@ use std::{mem, ptr};
 /// Creates a new device.
 // TODO: options
 pub fn create_device(adapter: Option<&Adapter>) -> (Device, DeviceContext) {
-	let adapter = match adapter {
+	let adapter = adapter.map(|adapter| adapter.as_inner().upcast().as_mut_ptr())
 		// D3D will pick the primary adapter of the system.
-		None => ptr::null_mut(),
-		// Creates a device for a specified graphics adapter.
-		Some(adapter) => unsafe { mem::transmute(adapter.as_inner().as_mut_ptr()) }
-	};
+		.unwrap_or(ptr::null_mut());
 
 	// Require at least Direct3D 11.1.
 	let feature_levels = [
