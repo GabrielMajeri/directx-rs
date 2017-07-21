@@ -1,5 +1,6 @@
-use {ComPtr, Interface, dxgi, dxgi1_2, dxgiformat, dxgitype, HWND, IUnknown};
-use common::DXObject;
+use {ComPtr, Interface, dxgi, dxgi1_2, dxgiformat, dxgitype, HWND};
+
+use common::winapi::d3d11;
 
 use factory::Factory;
 
@@ -15,58 +16,59 @@ impl SwapChain {
 	// TODO: is there a way to get a Device instead of an IUnknown?
 	// TODO: maybe support creating swapchains for CoreWindow or Composition?
 	// TODO: support creation options.
-	pub fn new(factory: &Factory, device: &mut IUnknown, window: HWND) -> Self {
-		let swap_chain = ComPtr::new({
-			let desc = dxgi1_2::DXGI_SWAP_CHAIN_DESC1 {
-				Width: 0,
-				Height: 0,
-				Format: dxgiformat::DXGI_FORMAT_R8G8B8A8_UNORM,
-				Stereo: false as i32,
-				SampleDesc: dxgitype::DXGI_SAMPLE_DESC {
-					// No antialiasing.
-					Count: 1,
-					Quality: 0
-				},
-				BufferUsage: dxgitype::DXGI_USAGE_RENDER_TARGET_OUTPUT,
-				// Single buffering.
-				BufferCount: 1,
-				Scaling: dxgi1_2::DXGI_SCALING_STRETCH,
-				// TODO: investigate the flip model.
-				SwapEffect: dxgi::DXGI_SWAP_EFFECT_DISCARD,
-				AlphaMode: dxgi1_2::DXGI_ALPHA_MODE_UNSPECIFIED,
-				Flags: 0
-			};
+	pub fn new<D>(factory: &Factory, device: &D, window: HWND) -> Self
+		where D: AsRef<ComPtr<d3d11::ID3D11Device>> {
+		let factory = factory.as_ref();
 
-			let fullscreen_desc = dxgi1_2::DXGI_SWAP_CHAIN_FULLSCREEN_DESC {
-				RefreshRate: dxgitype::DXGI_RATIONAL {
-					Numerator: 60,
-					Denominator: 1
-				},
-				ScanlineOrdering: dxgitype::DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED,
-				Scaling: dxgitype::DXGI_MODE_SCALING_UNSPECIFIED,
-				Windowed: true as i32
-			};
+		let device = device.as_ref().upcast().get_mut();
 
-			let mut swap_chain = ptr::null_mut();
+		let desc = dxgi1_2::DXGI_SWAP_CHAIN_DESC1 {
+			Width: 0,
+			Height: 0,
+			Format: dxgiformat::DXGI_FORMAT_R8G8B8A8_UNORM,
+			Stereo: false as i32,
+			SampleDesc: dxgitype::DXGI_SAMPLE_DESC {
+				// No antialiasing.
+				Count: 1,
+				Quality: 0
+			},
+			BufferUsage: dxgitype::DXGI_USAGE_RENDER_TARGET_OUTPUT,
+			// Single buffering.
+			BufferCount: 1,
+			Scaling: dxgi1_2::DXGI_SCALING_STRETCH,
+			// TODO: investigate the flip model.
+			SwapEffect: dxgi::DXGI_SWAP_EFFECT_DISCARD,
+			AlphaMode: dxgi1_2::DXGI_ALPHA_MODE_UNSPECIFIED,
+			Flags: 0
+		};
 
-			let result = unsafe {
-				factory.as_inner().CreateSwapChainForHwnd(
-					device,
-					window,
-					&desc,
-					&fullscreen_desc,
-					// TODO: support restriction to output.
-					ptr::null_mut(),
-					&mut swap_chain
-				)
-			};
+		let fullscreen_desc = dxgi1_2::DXGI_SWAP_CHAIN_FULLSCREEN_DESC {
+			RefreshRate: dxgitype::DXGI_RATIONAL {
+				Numerator: 60,
+				Denominator: 1
+			},
+			ScanlineOrdering: dxgitype::DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED,
+			Scaling: dxgitype::DXGI_MODE_SCALING_UNSPECIFIED,
+			Windowed: true as i32
+		};
 
-			assert_eq!(result, 0);
+		let mut swap_chain = ptr::null_mut();
 
-			swap_chain
-		});
+		let result = unsafe {
+			factory.CreateSwapChainForHwnd(
+				device,
+				window,
+				&desc,
+				&fullscreen_desc,
+				// TODO: support restriction to output.
+				ptr::null_mut(),
+				&mut swap_chain
+			)
+		};
 
-		SwapChain(swap_chain)
+		assert_eq!(result, 0);
+
+		SwapChain(ComPtr::new(swap_chain))
 	}
 
 	/// Returns a given buffer of the swap chain.

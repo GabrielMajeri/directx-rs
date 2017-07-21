@@ -1,5 +1,4 @@
-use {ComPtr, d3dcommon, d3d11, IUnknown};
-use common::DXObject;
+use {ComPtr, d3dcommon, d3d11};
 
 use dxgi::adapter::Adapter;
 
@@ -8,7 +7,11 @@ use std::{mem, ptr};
 /// Creates a new device.
 // TODO: options
 pub fn create_device(adapter: Option<&Adapter>) -> (Device, DeviceContext) {
-	let adapter = adapter.map(|adapter| adapter.as_inner().upcast().as_mut_ptr())
+	let adapter = adapter.map(|adapter| {
+			adapter.as_ref()
+				.upcast()
+				.get_mut() as *mut _
+		})
 		// D3D will pick the primary adapter of the system.
 		.unwrap_or(ptr::null_mut());
 
@@ -60,15 +63,6 @@ type DeviceInterface = d3d11::ID3D11Device;
 /// [ID3D11Device](https://msdn.microsoft.com/en-us/library/windows/desktop/ff476379(v=vs.85).aspx) interface.
 pub struct Device(ComPtr<DeviceInterface>);
 
-impl Device {
-	/// Up-casts this device to the `IUnknown` interface. Useful when working with DXGI.
-	pub fn as_unknown(&self) -> &mut IUnknown {
-		unsafe {
-			mem::transmute(self.as_inner().as_mut_ptr())
-		}
-	}
-}
-
 implement_object!(Device, DeviceInterface);
 
 type DeviceContextInterface = d3d11::ID3D11DeviceContext;
@@ -84,8 +78,8 @@ impl DeviceContext {
 		let color = [100.0/255.0, 149.0/255.0, 237.0/255.0, 0.0];
 
 		unsafe {
-			self.as_inner().ClearRenderTargetView(
-				rt_view.as_inner().as_mut_ptr(),
+			self.as_ref().ClearRenderTargetView(
+				rt_view.as_ref().get_mut(),
 				&color
 			)
 		}

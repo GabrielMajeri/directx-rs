@@ -57,7 +57,7 @@ fn main() {
 
 	let (device, context) = direct3d::device::create_device(Some(&adapter));
 
-	let swap_chain = dxgi::swap_chain::SwapChain::new(&factory, device.as_unknown(), hwnd);
+	let swap_chain = dxgi::swap_chain::SwapChain::new(&factory, &device, hwnd);
 
 	let rt_view = direct3d::render_target_view::RenderTargetView::from_swap_chain_back_buffer(&device, &swap_chain);
 

@@ -12,7 +12,6 @@ pub mod winapi {
 	pub use _winapi::Interface;
 
 	pub use _winapi::shared::windef::HWND;
-	pub use _winapi::um::unknwnbase::IUnknown;
 
 	pub use _winapi::shared::winerror;
 
@@ -26,5 +25,4 @@ pub mod winapi {
 	pub use _winapi::um::{d2d1};
 }
 
-#[macro_use] mod object;
-pub use object::DXObject;
+#[macro_use] mod macros;

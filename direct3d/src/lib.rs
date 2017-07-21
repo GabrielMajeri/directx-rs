@@ -5,7 +5,7 @@
 
 #[macro_use] extern crate common;
 use common::ComPtr;
-use common::winapi::{IUnknown, d3dcommon, d3d11};
+use common::winapi::{d3dcommon, d3d11};
 
 
 extern crate dxgi;

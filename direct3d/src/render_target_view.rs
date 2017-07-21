@@ -1,5 +1,4 @@
 use {ComPtr, d3d11};
-use common::DXObject;
 
 use dxgi::swap_chain::SwapChain;
 
@@ -21,8 +20,8 @@ impl RenderTargetView {
 		let mut rt_view = ptr::null_mut();
 
 		let result = unsafe {
-			device.as_inner().CreateRenderTargetView(
-				back_buffer.as_mut_ptr(),
+			device.as_ref().CreateRenderTargetView(
+				back_buffer.get_mut(),
 				ptr::null_mut(),
 				&mut rt_view
 			)
