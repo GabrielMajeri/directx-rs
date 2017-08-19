@@ -4,4 +4,5 @@ version = "0.1.0"
 authors = ["Gabriel Majeri <gabriel.majeri6@gmail.com>"]
 
 [target.'cfg(windows)'.dependencies]
-common = { path = "../common" }
+common = { path = ".." }
+direct3d = { path = "../direct3d" }

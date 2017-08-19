@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Gabriel Majeri <gabriel.majeri6@gmail.com>"]
 
 [target.'cfg(windows)'.dependencies]
-common = { path = "../common" }
+common = { path = ".." }
 dxgi = { path = "../dxgi" }
 
 [target.'cfg(windows)'.dev-dependencies]
