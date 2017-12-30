@@ -8,4 +8,4 @@ common = { path = ".." }
 dxgi = { path = "../dxgi" }
 
 [target.'cfg(windows)'.dev-dependencies]
-winit = "*"
+winit = "0.10"

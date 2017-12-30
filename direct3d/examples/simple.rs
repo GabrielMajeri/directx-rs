@@ -15,7 +15,7 @@ fn create_window() -> (winit::EventsLoop, winit::Window) {
 		.build(&events_loop)
 		.unwrap();
 
-	let monitor = winit::get_primary_monitor();
+	let monitor = events_loop.get_primary_monitor();
 	let (mwidth, mheight) = monitor.get_dimensions();
 
 	window.set_position((mwidth - width) as i32 / 2, (mheight - height) as i32 / 2);

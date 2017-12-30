@@ -8,8 +8,7 @@ publish = false
 comptr = { git = "https://github.com/GabrielMajeri/comptr-rs" }
 
 [target.'cfg(windows)'.dependencies.winapi]
-git = "https://github.com/retep998/winapi-rs"
-branch = "dev"
+version = "0.3"
 features = [
 	"winerror",
 	"dxgi1_5",
